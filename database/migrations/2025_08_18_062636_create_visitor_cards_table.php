@@ -27,17 +27,17 @@ return new class extends Migration
             $table->foreignId('station_id')->constrained('stations')->nullOnDelete();
             $table->text('visit_purpose');
             $table->enum('status', [
-                'sedang diproses',
-                'disetujui',
-                'ditolak',
-                'dibatalkan',
-            ])->default('sedang diproses');
-            $table->text('rejection_reason')->nullable();
-            $table->text('approval_notes')->nullable();
+                'processing',
+                'approved',
+                'rejected',
+                'cancelled',
+            ])->default('processing');
+            $table->text('rejection_reason');
+            $table->text('approval_notes');
             $table->foreignId('last_updated_by_user_id')->nullable()
                     ->constrained('users')->nullOnDelete()->cascadeOnUpdate();
             $table->string('last_updated_by_name_cached', 255)->nullable();
-            $table->timestamp('last_updated_at')->nullable();
+            $table->timestamp('last_updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamps();
 
             // Index

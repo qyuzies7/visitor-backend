@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('visitor_card_id')->constrained('visitor_cards')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('performed_by_user_id')->constrained('users')->restrictOnDelete()->cascadeOnUpdate();
             $table->string('performed_by_name_cached', 255);
-            $table->enum('old_status', ['sedang diproses', 'disetujui', 'ditolak', 'dibatalkan'])->default('sedang diproses');
-            $table->enum('new_status', ['sedang diproses', 'disetujui', 'ditolak', 'dibatalkan']);
+            $table->enum('old_status', ['processing', 'approved', 'rejected', 'cancelled'])->default('processing');
+            $table->enum('new_status', ['processing', 'approved', 'rejected', 'cancelled']);
             $table->text('notes')->nullable();
             $table->timestamp('changed_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamps();

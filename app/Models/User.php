@@ -2,47 +2,45 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
-        'name',
+        'full_name',
         'email',
         'password',
+        'role',
+        'station_id',
+        'description',
+        'is_active',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    public function station()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsTo(Station::class);
+    }
+
+    public function visitorCards()
+    {
+        return $this->hasMany(VisitorCard::class, 'last_updated_by_user_id');
+    }
+
+    public function performedTransactions()
+    {
+        return $this->hasMany(CardTransaction::class, 'performed_by_user_id');
+    }
+
+    public function performedStatusLogs()
+    {
+        return $this->hasMany(VisitorCardStatusLog::class, 'performed_by_user_id');
     }
 }

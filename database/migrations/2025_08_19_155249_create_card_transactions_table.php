@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('card_transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('visitor_card_id')->constrained('visitor_cards')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->enum('transaction_type', ['diserahkan', 'dikembalikan', 'rusak', 'hilang']);
-            $table->enum('card_condition', ['baik', 'rusak', 'hilang'])->default('baik');
+            $table->enum('transaction_type', ['issued', 'returned', 'damaged', 'lost']);
+            $table->enum('card_condition', ['good', 'damaged', 'lost'])->default('good');
             $table->text('condition_notes')->nullable();
             $table->text('handling_notes')->nullable();
 
