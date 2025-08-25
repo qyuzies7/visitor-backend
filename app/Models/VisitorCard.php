@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
 
 class VisitorCard extends Model
 {
@@ -21,6 +22,7 @@ class VisitorCard extends Model
         'visit_end_date',
         'station_id',
         'visit_purpose',
+        'document_path',
         'status',
         'rejection_reason',
         'approval_notes',
@@ -28,6 +30,23 @@ class VisitorCard extends Model
         'last_updated_by_name_cached',
         'last_updated_at',
     ];
+
+    protected $casts = [
+        'visit_start_date' => 'date',
+        'visit_end_date' => 'date',
+        'last_updated_at' => 'datetime',
+    ];
+
+
+    //generate nomor referensi
+    public static function generateReferenceNumber(): string
+    {
+        do {
+            $ref = 'VST-' . strtoupper(Str::random(8));
+        } while (self::where('reference_number', $ref)->exists());
+        
+        return $ref;
+    }
 
     public function visitType()
     {
@@ -54,13 +73,13 @@ class VisitorCard extends Model
         return $this->hasMany(CardTransaction::class);
     }
 
-    public function documents()
-    {
-        return $this->hasMany(Document::class);
-    }
-
     public function notificationLogs()
     {
         return $this->hasMany(NotificationLog::class, 'visitor_card_id');
+    }
+
+    public function getDocumentUrlAttribute(): ?string
+    {
+        return $this->document_path ? url('storage/' . $this->document_path) : null;
     }
 }

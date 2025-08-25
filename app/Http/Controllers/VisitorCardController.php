@@ -4,19 +4,27 @@ namespace App\Http\Controllers;
 
 use App\Models\VisitorCard;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class VisitorCardController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         return response()->json(VisitorCard::all());
     }
 
-    public function store(Request $request){
-        $validate = $request->validate([
-            'reference_number' => 'required|string|max:32|unique:visitor_cards,reference_number',
+    public function show($id)
+    {
+        $visitorCard = VisitorCard::findOrFail($id);
+        return response()->json($visitorCard);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
             'full_name' => 'required|string|max:255',
             'institution' => 'required|string|max:255',
-            'identity_number' => 'required|string|max:32',
+            'identity_number' => 'required|string|max:32|unique:visitor_cards,identity_number',
             'email' => 'required|email|max:255',
             'phone_number' => 'required|string|max:32',
             'visit_type_id' => 'required|exists:visit_types,id',
@@ -24,17 +32,26 @@ class VisitorCardController extends Controller
             'visit_end_date' => 'required|date|after_or_equal:visit_start_date',
             'station_id' => 'nullable|exists:stations,id',
             'visit_purpose' => 'required|string',
-            'status' => 'in:processing,approved,rejected,cancelled',
-            'rejection_reason' => 'required_if:status,rejected|string',
-            'approval_notes' => 'required_if:status,approved|string',
-            'last_updated_by_user_cached' => 'nullable|exists:users,id',
-            'last_updated_at' => 'nullable|date',
+            'document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
+
+        if ($request->hasFile('document')) {
+            $path = $request->file('document')->store('visitor_documents', 'public');
+            $validated['document_path'] = $path;
+        }
+
+        $validated['reference_number'] = VisitorCard::generateReferenceNumber();
+        $validated['status'] = 'processing';
+        
+        $visitorCard = VisitorCard::create($validated);
+        return response()->json($visitorCard, 201);
     }
-    public function update(Request $request, $id){
+
+    public function update(Request $request, $id)
+    {
         $visitorCard = VisitorCard::findOrFail($id);
+        
         $validated = $request->validate([
-            'reference_number' => "sometimes|string|max:32|unique:visitor_cards,reference_number,$id",
             'full_name' => 'sometimes|string|max:255',
             'institution' => 'sometimes|string|max:255',
             'identity_number' => "sometimes|string|max:32|unique:visitor_cards,identity_number,$id",
@@ -45,20 +62,37 @@ class VisitorCardController extends Controller
             'visit_end_date' => 'sometimes|date|after_or_equal:visit_start_date',
             'station_id' => 'nullable|exists:stations,id',
             'visit_purpose' => 'sometimes|string',
+            'document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'status' => 'sometimes|in:processing,approved,rejected,cancelled',
-            'rejection_reason' => 'required_if:status,rejected|string',
-            'approval_notes' => 'required_if:status,approved|string',
-            'last_updated_by_user_cached' => 'nullable|exists:users,id',
+            'rejection_reason' => 'required_if:status,rejected|string|nullable',
+            'approval_notes' => 'required_if:status,approved|string|nullable',
+            'last_updated_by_user_id' => 'nullable|exists:users,id',
             'last_updated_by_name_cached' => 'nullable|string|max:255',
-            'last_updated_at' => 'nullable|date',
         ]);
 
+        if ($request->hasFile('document')) {
+            if ($visitorCard->document_path) {
+                Storage::disk('public')->delete($visitorCard->document_path);
+            }
+            $path = $request->file('document')->store('visitor_documents', 'public');
+            $validated['document_path'] = $path;
+        }
+
+        $validated['last_updated_at'] = now();
+        
         $visitorCard->update($validated);
         return response()->json($visitorCard);
     }
-        public function destroy($id){
-            $visitorCard = VisitorCard::findOrFail($id);
-            $visitorCard->delete();
-            return response()->json(['message' => 'Visitor Card deleted']);
+
+    public function destroy($id)
+    {
+        $visitorCard = VisitorCard::findOrFail($id);
+        
+        if ($visitorCard->document_path) {
+            Storage::disk('public')->delete($visitorCard->document_path);
         }
+        
+        $visitorCard->delete();
+        return response()->json(['message' => 'Visitor Card deleted successfully']);
+    }
 }

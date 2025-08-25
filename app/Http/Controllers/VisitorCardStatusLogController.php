@@ -19,7 +19,7 @@ class VisitorCardStatusLogController extends Controller
             'old_status' => 'required|in:processing,approved,rejected,cancelled',
             'new_status' => 'required|in:processing,approved,rejected,cancelled',
             'notes' => 'nullable|string',
-            'changed_at' => 'nullable|date',
+            'changed_at' => 'nullable|date', 
         ]);
 
         $log = VisitorCardStatusLog::create($validated);

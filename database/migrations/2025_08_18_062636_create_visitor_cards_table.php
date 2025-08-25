@@ -12,39 +12,40 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('visitor_cards', function (Blueprint $table) {
-            $table->id();
-            $table->string('reference_number', 32)->unique();
-            $table->string('full_name', 255);
-            $table->string('institution', 255);
-            $table->string('identity_number', 32);
-            $table->string('email', 255);
-            $table->string('phone_number', 32);
-            $table->foreignId('visit_type_id')->constrained('visit_types')
-                    ->nullOnDelete()->cascadeOnUpdate();
-            $table->date('visit_start_date');
-            $table->date('visit_end_date');
-            $table->foreignId('station_id')->constrained('stations')->nullOnDelete();
-            $table->text('visit_purpose');
-            $table->enum('status', [
-                'processing',
-                'approved',
-                'rejected',
-                'cancelled',
-            ])->default('processing');
-            $table->text('rejection_reason');
-            $table->text('approval_notes');
-            $table->foreignId('last_updated_by_user_id')->nullable()
-                    ->constrained('users')->nullOnDelete()->cascadeOnUpdate();
-            $table->string('last_updated_by_name_cached', 255)->nullable();
-            $table->timestamp('last_updated_at')->useCurrent()->useCurrentOnUpdate();
-            $table->timestamps();
+    Schema::create('visitor_cards', function (Blueprint $table) {
+        $table->id();
+        $table->string('reference_number', 32)->unique();
+        $table->string('full_name', 255);
+        $table->string('institution', 255);
+        $table->string('identity_number', 32);
+        $table->string('email', 255);
+        $table->string('phone_number', 32);
+        $table->foreignId('visit_type_id')->constrained('visit_types')
+            ->nullOnDelete()->cascadeOnUpdate();
+        $table->date('visit_start_date');
+        $table->date('visit_end_date');
+        $table->foreignId('station_id')->constrained('stations')->nullOnDelete();
+        $table->text('visit_purpose');
+        $table->string('document_path')->nullable();
+        $table->enum('status', [
+        'processing',
+        'approved',
+        'rejected',
+        'cancelled',
+        ])->default('processing');
+        $table->text('rejection_reason');
+        $table->text('approval_notes');
+        $table->foreignId('last_updated_by_user_id')->nullable()
+            ->constrained('users')->nullOnDelete()->cascadeOnUpdate();
+        $table->string('last_updated_by_name_cached', 255)->nullable();
+        $table->timestamp('last_updated_at')->useCurrent()->useCurrentOnUpdate();
+        $table->timestamps();
 
-            // Index
-            $table->index('status', 'idx_vc_status');
-            $table->index(['visit_start_date', 'visit_end_date'], 'idx_vc_dates');
-            $table->index('station_id', 'idx_vc_station');
-        });
+        // Index
+        $table->index('status', 'idx_vc_status');
+        $table->index(['visit_start_date', 'visit_end_date'], 'idx_vc_dates');
+        $table->index('station_id', 'idx_vc_station');
+    });
 
         // Validasi tanggal
         DB::statement("

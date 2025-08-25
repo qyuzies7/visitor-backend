@@ -37,7 +37,8 @@ class NotificationLogController extends Controller
             'recipient' => 'sometimes|string|max:255',
             'message' => 'sometimes|string',
             'send_status' => 'sometimes|in:pending,sent,failed',
-            'error_message' => 'nullable|string',
+            'error_message' =>
+            'nullable|string',
             'sent_at' => 'nullable|date',
         ]);
 
