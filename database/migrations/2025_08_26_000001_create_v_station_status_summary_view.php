@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration {
     public function up(): void
     {
+        DB::statement('DROP VIEW IF EXISTS public.v_station_status_summary');
         DB::statement("CREATE VIEW v_station_status_summary AS
             SELECT
                 s.id AS station_id,
