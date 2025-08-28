@@ -19,7 +19,7 @@ class StationController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $station = Station::create($validated);
+        $station = Station::create($validatedData);
         return response()->json($station, 201);
     }
 

@@ -23,9 +23,9 @@ class UserController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $validated['password']=Hash::make($validated['password']);
+        $validatedData['password']=bcrypt($validated['password']);
 
-        $user = User::create($validatedData);
+        $user = User::create($validated);
         return response()->json($user, 201);
     }
 

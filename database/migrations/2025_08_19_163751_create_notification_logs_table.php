@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notification_logs_', function (Blueprint $table) {
+        Schema::create('notification_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('visitor_card_id')->constrained('visitor_cards')->cascadeOnDelete()->cascadeOnUpdate();
             $table->enum('notification_type', ['email', 'whatsapp']);

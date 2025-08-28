@@ -19,8 +19,8 @@ return new class extends Migration
             $table->enum('role', ['admin'])->default('admin');
             $table->foreignId('station_id')->nullable()
                 ->constrained('stations')
-                ->cacsadeOnUpdate()
-                ->restrictOnDelete();
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();

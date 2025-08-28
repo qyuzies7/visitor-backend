@@ -42,8 +42,8 @@ class NotificationLogController extends Controller
             'sent_at' => 'nullable|date',
         ]);
 
-        $notif->update($validated);
-        return response()->json($notif);
+        $notificationLog->update($validated);
+        return response()->json($notificationLog);
     }
 
     public function destroy($id){
