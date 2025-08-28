@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('visit_types', function (Blueprint $table) {
             $table->id();
-            $table->string('type_name', 100)->unique;
+            $table->string('type_name', 100)->unique();
             $table->integer('max_duration_days');
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);

@@ -7,8 +7,25 @@ use Illuminate\Http\Request;
 
 class VisitorCardStatusLogController extends Controller
 {
-    public function index(){
-        return response()->json(VisitorCardStatusLog::all());
+    public function index(Request $request)
+    {
+        $request->validate([
+            'visitor_card_id' => 'nullable|exists:visitor_cards,id',
+            'reference_number' => 'nullable|string',
+        ]);
+
+        $query = VisitorCardStatusLog::query();
+        if ($request->filled('visitor_card_id')) {
+            $query->where('visitor_card_id', $request->visitor_card_id);
+        } elseif ($request->filled('reference_number')) {
+            $visitorCard = \App\Models\VisitorCard::where('reference_number', $request->reference_number)->first();
+            if (!$visitorCard) {
+                return response()->json(['message' => 'Pengajuan tidak ditemukan'], 404);
+            }
+            $query->where('visitor_card_id', $visitorCard->id);
+        }
+        $logs = $query->orderBy('changed_at', 'desc')->get();
+        return response()->json($logs);
     }
 
     public function store(Request $request){
