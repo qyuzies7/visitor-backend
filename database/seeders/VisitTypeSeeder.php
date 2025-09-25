@@ -37,8 +37,8 @@ class VisitTypeSeeder extends Seeder
             ],
             [
                 'type_name' => 'Pelajar/Magang',
-                'max_duration_days' => 180,
-                'description' => 'Pelajar/Magang, sesuai kegiatan (maks 6 bulan)',
+                'max_duration_days' => 356,
+                'description' => 'Pelajar/Magang, sesuai kegiatan',
                 'is_active' => true,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),

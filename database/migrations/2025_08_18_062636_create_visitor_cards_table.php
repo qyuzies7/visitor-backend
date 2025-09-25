@@ -33,8 +33,8 @@ return new class extends Migration
         'rejected',
         'cancelled',
         ])->default('processing');
-        $table->text('rejection_reason');
-        $table->text('approval_notes');
+    $table->text('rejection_reason')->nullable();
+    $table->text('approval_notes')->nullable();
         $table->foreignId('last_updated_by_user_id')->nullable()
             ->constrained('users')->nullOnDelete()->cascadeOnUpdate();
         $table->string('last_updated_by_name_cached', 255)->nullable();
