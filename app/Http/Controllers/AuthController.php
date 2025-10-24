@@ -2,42 +2,57 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // Login admin
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
+        $data = $request->validate([
+            'email'    => ['required', 'email'],
+            'password' => ['required', 'string'],
         ]);
 
-        if (!Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Login gagal, email atau password salah'], 401);
+        $user = User::where('email', trim($data['email']))->first();
+
+        if (!$user || !Hash::check($data['password'], $user->password)) {
+            return response()->json(['message' => 'Email atau Password salah!'], 401);
         }
 
-        $user = Auth::user();
-        $token = $user->createToken('admin-token')->plainTextToken;
+        if (!$user->is_active) {
+            return response()->json(['message' => 'Akun tidak aktif'], 403);
+        }
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $user->tokens()->delete();
+
+        // Buat token Sanctum
+        $token = $user->createToken('admin')->plainTextToken;
+
         return response()->json([
             'message' => 'Login berhasil',
-            'token' => $token,
-            'user' => $user,
+            'token'   => $token,
+            'user'    => [
+                'id'        => $user->id,
+                'full_name' => $user->full_name,
+                'email'     => $user->email,
+                'role'      => $user->role,
+            ],
         ]);
     }
 
-    // Logout admin
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $request->user()->currentAccessToken()?->delete();
         return response()->json(['message' => 'Logout berhasil']);
     }
 
-    // Get current admin info
-    public function me(Request $request)
+    public function me(Request $request): JsonResponse
     {
         return response()->json($request->user());
     }

@@ -5,6 +5,7 @@ use App\Models\VisitorCard;
 use App\Models\CardTransaction;
 use App\Models\StationStatusSummary;
 use App\Models\StationDailyCardFlow;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -29,13 +30,24 @@ class DashboardController extends Controller
     public function getDamagedCards(Request $request)
     {
         $date = $request->date ?? now()->toDateString();
-        $count = CardTransaction::where('transaction_type','damaged')->whereDate('processed_at',$date)->count();
-        return response()->json(['damaged_cards_today' => $count]);
+        // use timezone-aware day range to avoid day-shift issues
+        $start = Carbon::parse($date, config('app.timezone'))->startOfDay();
+        $end = Carbon::parse($date, config('app.timezone'))->endOfDay();
+        $count = CardTransaction::where('transaction_type', 'damaged')
+            ->whereBetween('processed_at', [$start->toDateTimeString(), $end->toDateTimeString()])
+            ->count();
+        return response()->json(['total' => $count]);
     }
+
     public function getLostCards(Request $request)
     {
         $date = $request->date ?? now()->toDateString();
-        $count = CardTransaction::where('transaction_type','lost')->whereDate('processed_at',$date)->count();
-        return response()->json(['lost_cards_today' => $count]);
+        // use timezone-aware day range to avoid day-shift issues
+        $start = Carbon::parse($date, config('app.timezone'))->startOfDay();
+        $end = Carbon::parse($date, config('app.timezone'))->endOfDay();
+        $count = CardTransaction::where('transaction_type', 'lost')
+            ->whereBetween('processed_at', [$start->toDateTimeString(), $end->toDateTimeString()])
+            ->count();
+        return response()->json(['total' => $count]);
     }
 }

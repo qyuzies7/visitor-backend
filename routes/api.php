@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -11,31 +12,37 @@ use App\Http\Controllers\StationController;
 use App\Http\Controllers\VisitTypeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NotificationLogController;
+use App\Http\Controllers\OptionListController;
 
-
-//user
 Route::prefix('public')->group(function () {
-    // Landing page 
+    // Landing page
     Route::get('/visit-types', [VisitTypeController::class, 'index']);
     Route::get('/stations', [StationController::class, 'index']);
 
     // Ajukan permohonan kartu visitor
     Route::post('/visitor-cards', [VisitorCardController::class, 'store']);
+
+    // layanan pendampingan
+    Route::get('/options', [OptionListController::class, 'index']);
+
     // Konfirmasi data & detail status pengajuan
     Route::get('/visitor-cards/{id}', [VisitorCardController::class, 'show']);
+    Route::get('/visitor-cards/{id}/detail', [VisitorCardController::class, 'show']);
 
     // Cek status pengajuan (by reference number)
     Route::post('/check-status', [VisitorCardController::class, 'checkStatus']);
-    Route::get('/visitor-cards/{id}/detail', [VisitorCardController::class, 'show']);
+
+    // Riwayat status (publik)
     Route::get('/status-logs', [VisitorCardStatusLogController::class, 'index']);
 
     // Batalkan & ajukan ulang pengajuan
     Route::post('/cancel-application', [VisitorCardController::class, 'cancel']);
     Route::post('/resubmit-application', [VisitorCardController::class, 'resubmit']);
+
+    Route::get('/documents/download', [VisitorCardController::class, 'downloadDocument']);
 });
 
-
-//admin
+// admin
 Route::prefix('admin')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 
@@ -54,16 +61,21 @@ Route::prefix('admin')->group(function () {
             Route::get('/lost-cards', [DashboardController::class, 'getLostCards']);
         });
 
-        // Verifikasi 
+        // ===== Verifikasi =====
         Route::prefix('verification')->group(function () {
+            Route::get('/', [VisitorCardController::class, 'index']);
             Route::get('/pending', [VisitorCardController::class, 'getPending']);
+            Route::get('/approved', [VisitorCardController::class, 'getApproved']);   // Tambahkan ini
+            Route::get('/rejected', [VisitorCardController::class, 'getRejected']);   // Tambahkan ini
             Route::post('/detail', [VisitorCardController::class, 'detailByReference']);
             Route::post('/approve', [VisitorCardController::class, 'approve']);
             Route::post('/reject', [VisitorCardController::class, 'reject']);
             Route::post('/bulk-action', [VisitorCardController::class, 'bulkAction']);
         });
 
-        // Kartu visitor 
+        Route::get('/documents/download', [VisitorCardController::class, 'downloadDocument']);
+
+        // Kartu visitor
         Route::prefix('cards')->group(function () {
             Route::get('/approved', [CardTransactionController::class, 'listApproved']);
             Route::get('/active', [CardTransactionController::class, 'listActive']);
@@ -94,7 +106,6 @@ Route::prefix('admin')->group(function () {
         Route::apiResource('notifications', NotificationLogController::class);
     });
 });
-
 
 Route::get('/health', function () {
     return response()->json(['status' => 'OK', 'timestamp' => now()]);

@@ -13,16 +13,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'full_name' => 'Test User',
-            'email' => 'test@example.com',
+        // Seeder user admin
+        User::create([
+            'full_name' => 'Admin KAI',
+            'email' => 'adminzz@gmail.com',
+            'password' => \Hash::make('adminkai'),
         ]);
 
         $this->call([
             StationSeeder::class,
             VisitTypeSeeder::class,
         ]);
+
+        $this->call([
+            OptionListSeeder::class,
+     ]);
     }
 }
